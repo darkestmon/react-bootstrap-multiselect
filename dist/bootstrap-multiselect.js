@@ -385,6 +385,7 @@ exports.init = function (jQuery) {
                 enableClickableOptGroups: false,
                 enableCollapsibleOptGroups: false,
                 filterPlaceholder: 'Search',
+                filterKeywords: '',
                 // possible options: 'text', 'value', 'both'
                 filterBehavior: 'text',
                 includeFilterClearBtn: true,
@@ -988,62 +989,7 @@ exports.init = function (jQuery) {
 
                                 if (this.query !== event.target.value) {
                                     this.query = event.target.value;
-
-                                    var currentGroup, currentGroupVisible;
-                                    $.each($('li', this.$ul), $.proxy(function (index, element) {
-                                        var value = $('input', element).length > 0 ? $('input', element).val() : "";
-                                        var text = $('label', element).text();
-
-                                        var filterCandidate = '';
-                                        if (this.options.filterBehavior === 'text') {
-                                            filterCandidate = text;
-                                        } else if (this.options.filterBehavior === 'value') {
-                                            filterCandidate = value;
-                                        } else if (this.options.filterBehavior === 'both') {
-                                            filterCandidate = text + '\n' + value;
-                                        }
-
-                                        if (value !== this.options.selectAllValue && text) {
-
-                                            // By default lets assume that element is not
-                                            // interesting for this search.
-                                            var showElement = false;
-
-                                            if (this.options.enableCaseInsensitiveFiltering) {
-                                                filterCandidate = filterCandidate.toLowerCase();
-                                                this.query = this.query.toLowerCase();
-                                            }
-
-                                            if (this.options.enableFullValueFiltering && this.options.filterBehavior !== 'both') {
-                                                var valueToMatch = filterCandidate.trim().substring(0, this.query.length);
-                                                if (this.query.indexOf(valueToMatch) > -1) {
-                                                    showElement = true;
-                                                }
-                                            } else if (filterCandidate.indexOf(this.query) > -1) {
-                                                showElement = true;
-                                            }
-
-                                            // Toggle current element (group or group item) according to showElement boolean.
-                                            $(element).toggle(showElement).toggleClass('multiselect-filter-hidden', !showElement);
-
-                                            // Differentiate groups and group items.
-                                            if ($(element).hasClass('multiselect-group')) {
-                                                // Remember group status.
-                                                currentGroup = element;
-                                                currentGroupVisible = showElement;
-                                            } else {
-                                                // Show group name when at least one of its items is visible.
-                                                if (showElement) {
-                                                    $(currentGroup).show().removeClass('multiselect-filter-hidden');
-                                                }
-
-                                                // Show all group items when group name satisfies filter.
-                                                if (!showElement && currentGroupVisible) {
-                                                    $(element).show().removeClass('multiselect-filter-hidden');
-                                                }
-                                            }
-                                        }
-                                    }, this));
+                                    this.applyFilter(this.query);
                                 }
 
                                 this.updateSelectAll();
@@ -1057,6 +1003,70 @@ exports.init = function (jQuery) {
                         }, this));
                     }
                 }
+            },
+
+            /**
+             * Applies FilterKeyword to the list
+             */
+            applyFilter: function applyFilter(keywords) {
+                this.query = keywords;
+                this.$filter.find('.multiselect-search').val(this.query);
+
+                var currentGroup, currentGroupVisible;
+                $.each($('li', this.$ul), $.proxy(function (index, element) {
+                    var value = $('input', element).length > 0 ? $('input', element).val() : "";
+                    var text = $('label', element).text();
+
+                    var filterCandidate = '';
+                    if (this.options.filterBehavior === 'text') {
+                        filterCandidate = text;
+                    } else if (this.options.filterBehavior === 'value') {
+                        filterCandidate = value;
+                    } else if (this.options.filterBehavior === 'both') {
+                        filterCandidate = text + '\n' + value;
+                    }
+
+                    if (value !== this.options.selectAllValue && text) {
+
+                        // By default lets assume that element is not
+                        // interesting for this search.
+                        var showElement = false;
+
+                        if (this.options.enableCaseInsensitiveFiltering) {
+                            filterCandidate = filterCandidate.toLowerCase();
+                            this.query = this.query.toLowerCase();
+                        }
+
+                        if (this.options.enableFullValueFiltering && this.options.filterBehavior !== 'both') {
+                            var valueToMatch = filterCandidate.trim().substring(0, this.query.length);
+                            if (this.query.indexOf(valueToMatch) > -1) {
+                                showElement = true;
+                            }
+                        } else if (filterCandidate.indexOf(this.query) > -1) {
+                            showElement = true;
+                        }
+
+                        // Toggle current element (group or group item) according to showElement boolean.
+                        $(element).toggle(showElement).toggleClass('multiselect-filter-hidden', !showElement);
+
+                        // Differentiate groups and group items.
+                        if ($(element).hasClass('multiselect-group')) {
+                            // Remember group status.
+                            currentGroup = element;
+                            currentGroupVisible = showElement;
+                        } else {
+                            // Show group name when at least one of its items is visible.
+                            if (showElement) {
+                                $(currentGroup).show().removeClass('multiselect-filter-hidden');
+                            }
+
+                            // Show all group items when group name satisfies filter.
+                            if (!showElement && currentGroupVisible) {
+                                $(element).show().removeClass('multiselect-filter-hidden');
+                            }
+                        }
+                    }
+                }, this));
             },
 
             /**

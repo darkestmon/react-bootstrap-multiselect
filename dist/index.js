@@ -122,6 +122,9 @@ var MultiSelect = function (_React$Component) {
 			} else {
 				this.$multiselect.multiselect('enable');
 			}
+			if (nextProps.filterKeywords !== '') {
+				this.$multiselect.multiselect('applyFilter', nextProps.filterKeywords);
+			}
 		}
 	}, {
 		key: 'render',
