@@ -124,6 +124,7 @@ var MultiSelect = function (_React$Component) {
 			}
 			if (nextProps.filterKeywords !== '') {
 				this.$multiselect.multiselect('applyFilter', nextProps.filterKeywords);
+				this.$multiselect.multiselect('updateSelectAll');
 			}
 		}
 	}, {
